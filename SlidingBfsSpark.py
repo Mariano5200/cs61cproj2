@@ -3,11 +3,11 @@ import Sliding, argparse
 
 def bfs_map(value):
     """ YOUR CODE HERE """
-    pass # delete this line
+    return Sliding.children(WIDTH, HEIGHT, value)
 
 def bfs_reduce(value1, value2):
     """ YOUR CODE HERE """
-    pass # delete this line
+    return value1 + value2
 
 def solve_sliding_puzzle(master, output, height, width):
     """
@@ -38,39 +38,34 @@ def solve_sliding_puzzle(master, output, height, width):
     isdone = False
     level_to_pos = {}
     pos_to_level = {}
-    visited = []
+    visited = [sol]
     visited = set(visited)
-    currBoard = [sol]
+    currBoard = []
+    currBoard.append(sol)
     rdd = sc.parallelize(currBoard)
     level = 0
-
-    def map(arg):
-        #takes in the rdd, which is a list of the positions in the current level
-        for pos in arg:
-            return Sliding.children(WIDTH, HEIGHT, pos)
-
-    def reduce(arg1, arg2):
-        return arg1 + arg2
+    level_to_pos[level] = [sol]
+    level += 1
 
     while isdone == False:
-        rdd = rdd.map(map) \
-                .reduce(reduce)
-
+        rdd = rdd.map(bfs_map) \
+                .reduce(bfs_reduce)
         currlevelset = set(rdd) #gets rid of duplicates
         if currlevelset.issubset(visited):
             isdone = True
         currlevelset = currlevelset.difference(visited) #gets rid of positions visited in previous levels
+        if not currlevelset:
+            isdone = True
         level_to_pos[level] = list(currlevelset) #adds the remaining positions to current level
-
-        for x in currlevelset:
-            pos_to_level[x] = level
+        visited = visited.union(currlevelset)
         rdd = sc.parallelize(list(currlevelset))
         level += 1
 
     """ YOUR OUTPUT CODE HERE """
 
     sc.stop()
-
+    for i in level_to_pos:
+        output(str(level_to_pos[i]))
 
 
 """ DO NOT EDIT PAST THIS LINE
