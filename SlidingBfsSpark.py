@@ -35,26 +35,37 @@ def solve_sliding_puzzle(master, output, height, width):
 
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
+    isdone = False
+    level_to_pos = {}
+    pos_to_level = {}
+    visited = []
+    visited = set(visited)
     currBoard = [sol]
     rdd = sc.parallelize(currBoard)
+    level = 0
 
-    def flatmap(arg):
-        #arg is the board
+    def map(arg):
+        #takes in the rdd, which is a list of the positions in the current level
         for pos in arg:
             return Sliding.children(WIDTH, HEIGHT, pos)
-    def map(arg):
-        #attach each position to its corresponding level
-        return (arg, level)
-    def reduce(level1, level2): #we want to match keys (postiions) up with similar keys and compare values (levels) but our RDD doesn't include key-value pairs with different levels!
-        return min(level1, leve2)
-    while currBoard: # we need to somehow detect if we are done
-        rdd = rdd.flatMap(flatmap) \
-                  .map(map) \
-                  .reduceByKey(reduce)
-        #for position in rdd:
-        #   post_to_level[position[0]] = position[1]
+
+    def reduce(arg1, arg2):
+        return arg1 + arg2
+
+    while isdone == False:
+        rdd = rdd.map(map) \
+                .reduce(reduce)
+
+        currlevelset = set(rdd) #gets rid of duplicates
+        if currlevelset.issubset(visited):
+            isdone = True
+        currlevelset = currlevelset.difference(visited) #gets rid of positions visited in previous levels
+        level_to_pos[level] = list(currlevelset) #adds the remaining positions to current level
+
+        for x in currlevelset:
+            pos_to_level[x] = level
+        rdd = sc.parallelize(list(currlevelset))
         level += 1
-        currBoard = rdd
 
     """ YOUR OUTPUT CODE HERE """
 
