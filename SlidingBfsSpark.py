@@ -35,37 +35,69 @@ def solve_sliding_puzzle(master, output, height, width):
 
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
-    isdone = False
-    level_to_pos = {}
-    pos_to_level = {}
-    visited = [sol]
-    visited = set(visited)
-    currBoard = []
-    currBoard.append(sol)
+    currBoard = [(sol, 0)]
     rdd = sc.parallelize(currBoard)
-    level = 0
-    level_to_pos[level] = [sol]
-    level += 1
+    prevrdd = rdd
+    isdone = False
+    pos_to_level = {}
+
+    def map(arg):
+        if arg[1] == level:
+            children =  Sliding.children(WIDTH, HEIGHT, arg[0])
+            toreturn = []
+            for position in children:
+                toreturn.append((position, level + 1))
+            return toreturn
+        else:
+            return arg
+    def reduce(arg1, arg2):
+        return min(arg1, arg2)
+
 
     while isdone == False:
-        rdd = rdd.map(bfs_map) \
-                .reduce(bfs_reduce)
-        currlevelset = set(rdd) #gets rid of duplicates
-        if currlevelset.issubset(visited):
+        prevrdd = rdd
+        rdd = rdd.flatmap(map) \
+                .reduce(reduce)
+        if (rdd == prevrdd):
             isdone = True
-        currlevelset = currlevelset.difference(visited) #gets rid of positions visited in previous levels
-        if not currlevelset:
-            isdone = True
-        level_to_pos[level] = list(currlevelset) #adds the remaining positions to current level
-        visited = visited.union(currlevelset)
-        rdd = sc.parallelize(list(currlevelset))
         level += 1
+
+    finalsolution = rdd.collect()
+    for positiontuple in finalsolution:
+        pos_to_level[positiontuple[0]] = positiontuple[1]
+
+    ##SET METHOD: THIS SHIT WORKS
+    # isdone = False
+    # level_to_pos = {}
+    # pos_to_level = {}
+    # visited = [sol]
+    # visited = set(visited)
+    # currBoard = []
+    # currBoard.append(sol)
+    # rdd = sc.parallelize(currBoard)
+    # level = 0
+    # level_to_pos[level] = [sol]
+    # level += 1
+
+    # while isdone == False:
+    #     rdd = rdd.map(bfs_map) \
+    #             .reduce(bfs_reduce)
+    #     currlevelset = set(rdd) #gets rid of duplicates
+    #     if currlevelset.issubset(visited):
+    #         isdone = True
+    #     currlevelset = currlevelset.difference(visited) #gets rid of positions visited in previous levels
+    #     if not currlevelset:
+    #         isdone = True
+    #     level_to_pos[level] = list(currlevelset) #adds the remaining positions to current level
+    #     visited = visited.union(currlevelset)
+    #     rdd = sc.parallelize(list(currlevelset))
+    #     level += 1
 
     """ YOUR OUTPUT CODE HERE """
 
     sc.stop()
-    for i in level_to_pos:
-        output(str(level_to_pos[i]))
+    for i in pos_to_level:
+        output(pos_to_level[i] + " "+ str(i))
 
 
 """ DO NOT EDIT PAST THIS LINE
