@@ -35,28 +35,30 @@ def solve_sliding_puzzle(master, output, height, width):
 
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
-    currBoard = [(sol, 0)]
-    rdd = sc.parallelize(currBoard)
+    rdd = [(sol, 0)]
     prevrdd = rdd
-    isdone = False
+    isdone = False	
     pos_to_level = {}
 
-    def map(arg):
+    def flatmap(arg):
         if arg[1] == level:
             children =  Sliding.children(WIDTH, HEIGHT, arg[0])
-            toreturn = []
+            toreturn = [arg]
             for position in children:
                 toreturn.append((position, level + 1))
-            return toreturn
+            return [toreturn]
         else:
             return arg
-    def reduce(arg1, arg2):
-        return min(arg1, arg2)
 
+    def reduce(arg1, arg2):
+        return arg1 + arg2
 
     while isdone == False:
         prevrdd = rdd
-        rdd = rdd.flatmap(map) \
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print(rdd)
+        rdd = sc.parallelize(rdd)
+        rdd = rdd.flatMap(flatmap) \
                 .reduce(reduce)
         if (rdd == prevrdd):
             isdone = True
