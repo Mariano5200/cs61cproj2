@@ -3,11 +3,13 @@ import Sliding, argparse
 
 def bfs_map(value):
     """ YOUR CODE HERE """
-    return Sliding.children(WIDTH, HEIGHT, value)
+
+    # return Sliding.children(WIDTH, HEIGHT, value)
 
 def bfs_reduce(value1, value2):
     """ YOUR CODE HERE """
-    return value1 + value2
+
+    # return value1 + value2
 
 def solve_sliding_puzzle(master, output, height, width):
     """
@@ -36,9 +38,11 @@ def solve_sliding_puzzle(master, output, height, width):
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
     rdd = [(sol, 0)]
-    prevrdd = rdd
-    isdone = False	
+    isdone = False    
     pos_to_level = {}
+    prevcount = 0
+    c = 1
+    rdd = sc.parallelize(rdd)
 
     def flatmap(arg):
         if arg[1] == level:
@@ -46,27 +50,21 @@ def solve_sliding_puzzle(master, output, height, width):
             toreturn = [arg]
             for position in children:
                 toreturn.append((position, level + 1))
-            return [toreturn]
+            return toreturn
         else:
-            return arg
+            return [arg]
 
     def reduce(arg1, arg2):
-        return arg1 + arg2
+        return min(arg1, arg2)
 
-    while isdone == False:
-        prevrdd = rdd
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print(rdd)
-        rdd = sc.parallelize(rdd)
+    while c != prevcount:
         rdd = rdd.flatMap(flatmap) \
-                .reduce(reduce)
-        if (rdd == prevrdd):
-            isdone = True
+                .reduceByKey(reduce)
+        prevcount = c
+        c = rdd.count()
         level += 1
 
     finalsolution = rdd.collect()
-    for positiontuple in finalsolution:
-        pos_to_level[positiontuple[0]] = positiontuple[1]
 
     ##SET METHOD: THIS SHIT WORKS
     # isdone = False
@@ -85,8 +83,6 @@ def solve_sliding_puzzle(master, output, height, width):
     #     rdd = rdd.map(bfs_map) \
     #             .reduce(bfs_reduce)
     #     currlevelset = set(rdd) #gets rid of duplicates
-    #     if currlevelset.issubset(visited):
-    #         isdone = True
     #     currlevelset = currlevelset.difference(visited) #gets rid of positions visited in previous levels
     #     if not currlevelset:
     #         isdone = True
@@ -96,10 +92,15 @@ def solve_sliding_puzzle(master, output, height, width):
     #     level += 1
 
     """ YOUR OUTPUT CODE HERE """
+    #SET METHOD
+    # sc.stop()
+    # for i in level_to_pos:
+    #     output(str(level_to_pos[i]))
 
+    #kv method
     sc.stop()
-    for i in pos_to_level:
-        output(pos_to_level[i] + " "+ str(i))
+    for positiontuple in finalsolution:
+        output(str(positiontuple[1]) + " " + str(positiontuple[0]))
 
 
 """ DO NOT EDIT PAST THIS LINE
