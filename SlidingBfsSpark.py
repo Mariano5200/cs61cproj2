@@ -1,14 +1,21 @@
 from pyspark import SparkContext
 import Sliding, argparse
 
-def bfs_map(value):
+def bfs_map(arg):
     """ YOUR CODE HERE """
-
+    if arg[1] == level:
+        children =  Sliding.children(WIDTH, HEIGHT, arg[0])
+        toreturn = [arg]
+        for position in children:
+            toreturn.append((position, level + 1))
+        return toreturn
+    else:
+        return [arg]
     # return Sliding.children(WIDTH, HEIGHT, value)
 
-def bfs_reduce(value1, value2):
+def bfs_reduce(arg1, arg2):
     """ YOUR CODE HERE """
-
+    return min(arg1, arg2)
     # return value1 + value2
 
 def solve_sliding_puzzle(master, output, height, width):
@@ -38,31 +45,21 @@ def solve_sliding_puzzle(master, output, height, width):
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
     rdd = [(sol, 0)]
-    isdone = False    
-    pos_to_level = {}
     prevcount = 0
     c = 1
     rdd = sc.parallelize(rdd)
-
-    def flatmap(arg):
-        if arg[1] == level:
-            children =  Sliding.children(WIDTH, HEIGHT, arg[0])
-            toreturn = [arg]
-            for position in children:
-                toreturn.append((position, level + 1))
-            return toreturn
-        else:
-            return [arg]
-
-    def reduce(arg1, arg2):
-        return min(arg1, arg2)
+    k = 0
 
     while c != prevcount:
-        rdd = rdd.flatMap(flatmap) \
-                .reduceByKey(reduce)
+        if k == 10:
+            rdd.partitionBy(8)
+            k = 0
+        rdd = rdd.flatMap(bfs_map) \
+                .reduceByKey(bfs_reduce, numPartitions=16)
         prevcount = c
         c = rdd.count()
         level += 1
+        k += 1
 
     finalsolution = rdd.collect()
 
