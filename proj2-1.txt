@@ -1,15 +1,15 @@
-Partner 1 Name:
-Partner 1 Login:
+Partner 1 Name: Teddey Xiao
+Partner 1 Login: cs61c-asz	
 
-Partner 2 Name:
+Partner 2 Name: Nicholas Xu
 Partner 2 Login:
 
-1. some solutions have moves that only lead to other possible solutions, so there is no point in strongly solving starting from each different permutation
+1. Some permutations are unreachable from the starting position. For example, a 2x2 sliding puzzle will have 4! = 24 total possible positions, but we see from the project that only 12 positions are reachable from the starting position. Thus, not all positions are reachable from the starting solution, so there may be some permutations that aren't reachable, so the algorithm is flawed. 
 
 
 
-2. a better algorithm would be to just modify the normal algorithm to check if a certain permutation is a solution
+2. A better algorithm would be to just modify the normal algorithm to check if a certain permutation is a solution. We do this by running some kind of search (BFS or DFS) and checking if the osition we reach at each node is a solution. 
 
 
 
-3. you might want to store the moves that led to that point so you can run them reverse to check if they are a solution. however, the solver would then need much more memory requirements
+3. You might want to store the moves that led to that point so you can run them reverse to check if they are a solution. However, the solver would then need much more memory requirements because it needs to store all these moves. 
