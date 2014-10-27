@@ -4,12 +4,12 @@ Partner 1 Login:
 Partner 2 Name:
 Partner 2 Login:
 
-1.
+1. some solutions have moves that only lead to other possible solutions, so there is no point in strongly solving starting from each different permutation
 
 
 
-2.
+2. a better algorithm would be to just modify the normal algorithm to check if a certain permutation is a solution
 
 
 
-3.
+3. you might want to store the moves that led to that point so you can run them reverse to check if they are a solution. however, the solver would then need much more memory requirements
