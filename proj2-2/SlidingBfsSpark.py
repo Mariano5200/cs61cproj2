@@ -4,10 +4,10 @@ import Sliding, argparse
 def bfs_map(arg):
     """ YOUR CODE HERE """
     if arg[1] == level:
-        children =  Sliding.children(WIDTH, HEIGHT, hash_to_board(arg[0]))
+        children =  Sliding.children(WIDTH, HEIGHT, Sliding.hash_to_board(WIDTH, HEIGHT, arg[0]))
         toreturn = [arg]
         for position in children:
-            toreturn.append((board_to_hash(position), level + 1))
+            toreturn.append((Sliding.board_to_hash(WIDTH, HEIGHT, position), level + 1))
         return toreturn
     else:
         return [arg]
@@ -16,7 +16,7 @@ def bfs_reduce(arg1, arg2):
     """ YOUR CODE HERE """
     return min(arg1, arg2)
 
-def solve_sliding_puzzle(master, output, height, width, slaves):
+def solve_puzzle(master, output, height, width, slaves):
     """
     Solves a sliding puzzle of the provided height and width.
      master: specifies master url for the spark context
@@ -42,7 +42,7 @@ def solve_sliding_puzzle(master, output, height, width, slaves):
 
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
-    rdd = [(sol, 0)]
+    rdd = [(Sliding.board_to_hash(WIDTH, HEIGHT, sol), 0)]
     prevcount = 0
     c = 1
     rdd = sc.parallelize(rdd)
@@ -61,7 +61,7 @@ def solve_sliding_puzzle(master, output, height, width, slaves):
 
     #finalsolution = rdd.collect()
 
-    sc.stop()
+    #sc.stop()
     rdd.coalesce(slaves).saveAsTextFile(output)
     # for positiontuple in finalsolution:
     #     output(str(positiontuple[1]) + " " + str(positiontuple[0]))
