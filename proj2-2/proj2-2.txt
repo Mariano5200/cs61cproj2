@@ -10,5 +10,18 @@ Partner 2 Login: cs61c-co
 4) What was the price per GB processed for each cluster size? (Recall that an extra-large instance costs $0.68 per hour, rounded up to the nearest hour.)
 5) How many dollars in EC2 credits did you use to complete this project?
 
-24.84575 MB, 24. (medium 6 slaves)
+24.84575 MB, (medium 6 slaves)
 1:40 elapsed
+
+1) Medium 12 - 1:41.24 elapsed
+Medium 6 - 1:40 elapsed
+
+2) Medium 6 - 0.2484575 MB/s
+Medium 12 - 0.24599752475 MB/s
+
+3)
+
+4)
+
+5)
+
