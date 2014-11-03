@@ -50,7 +50,7 @@ def solve_puzzle(master, output, height, width, slaves):
 
     while c != prevcount:
         if k == 16:
-            rdd.partitionBy(PARTITION_COUNT, hash)
+            rdd = rdd.partitionBy(PARTITION_COUNT, hash)
             k = 0
         rdd = rdd.flatMap(bfs_map) \
                 .reduceByKey(bfs_reduce, numPartitions=16)
