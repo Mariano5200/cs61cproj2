@@ -47,15 +47,19 @@ def solve_puzzle(master, output, height, width, slaves):
     c = 1
     rdd = sc.parallelize(rdd)
     k = 0
+    j = 0
 
     while c != prevcount:
+        if j == 8:
+            prevcount = c
+            c = rdd.count()
+            j = 0
         if k == 16:
             rdd = rdd.partitionBy(PARTITION_COUNT, hash)
             k = 0
         rdd = rdd.flatMap(bfs_map) \
                 .reduceByKey(bfs_reduce, numPartitions=16)
-        prevcount = c
-        c = rdd.count()
+        j += 1
         level += 1
         k += 1
 
